@@ -2,11 +2,12 @@
 
 A hybrid retrieval-based question answering assistant using BM25, MiniLM semantic search, RRF fusion, and RAG with Streamlit/Gradio interface.
 
-This branch contains **Jomana's assigned first milestone only**:
+This repository now includes:
 
-**Build BM25 retrieval for keyword-based lexical search.**
+- the CI/CD scaffold from the project infrastructure work
+- Jomana's assigned first milestone: **BM25 retrieval for keyword-based lexical search**
 
-## Jomana Scope
+## Jomana BM25 Scope
 
 - Load the provided `DataSet.zip` StackLite corpus.
 - Preprocess Stack Exchange question titles, HTML bodies, tags, and citation metadata.
@@ -14,7 +15,7 @@ This branch contains **Jomana's assigned first milestone only**:
 - Return top-10 lexical search results for sample technical questions.
 - Provide a Colab-ready notebook with saved outputs for the BM25 retrieval demo.
 
-Out of scope for this branch:
+Out of scope for Jomana's BM25 milestone:
 
 - semantic search
 - hybrid fusion
@@ -22,9 +23,8 @@ Out of scope for this branch:
 - retrieval evaluation metrics
 - citation-quality review
 - UI integration
-- CI/CD
 
-## Files
+## BM25 Files
 
 - `src/bm25_retriever.py` - reusable BM25 loader, preprocessing, indexing, search, and CSV export code.
 - `scripts/run_bm25_demo.py` - local demo script that exports top-10 results for sample questions.
@@ -33,7 +33,7 @@ Out of scope for this branch:
 - `results/bm25_sample_top10.csv` - generated top-10 sample retrieval results.
 - `DataSet.zip` - provided corpus archive.
 
-## Run Locally
+## Run BM25 Locally
 
 ```bash
 python scripts/run_bm25_demo.py
@@ -51,7 +51,7 @@ To rerun the notebook and save its outputs:
 python scripts/execute_notebook_inplace.py
 ```
 
-## Method Summary
+## BM25 Method Summary
 
 The retriever indexes each StackLite question as:
 
@@ -66,4 +66,17 @@ It uses Okapi BM25 with:
 - IDF smoothing: `log(1 + (N - df + 0.5) / (df + 0.5))`
 
 Each result includes citation-ready metadata: title, source, Stack Exchange link, tags, score, answer count, and snippet.
+
+## CI/CD
+
+This repository includes a GitHub Actions pipeline in `.github/workflows/ci.yml`.
+
+The CI stages are:
+
+1. Lint
+2. Unit tests with coverage
+3. Data validation
+4. Model or retriever validation
+
+See `docs/ci_cd_setup.md` for setup notes and branch protection instructions.
 
