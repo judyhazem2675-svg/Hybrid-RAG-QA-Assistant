@@ -11,6 +11,7 @@ import contextlib
 import io
 import json
 import os
+import sys
 import traceback
 from pathlib import Path
 from types import CodeType
@@ -18,7 +19,7 @@ from typing import Any
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-NOTEBOOK_PATH = PROJECT_ROOT / "notebooks" / "Jomana_BM25_Retrieval.ipynb"
+DEFAULT_NOTEBOOK_PATH = PROJECT_ROOT / "notebooks" / "Jomana_BM25_Retrieval.ipynb"
 
 
 def rich_output(value: Any) -> dict[str, Any]:
@@ -45,10 +46,14 @@ def split_last_expression(source: str) -> tuple[CodeType, ast.expr | None]:
 
 def main() -> None:
     os.chdir(PROJECT_ROOT)
-    notebook = json.loads(NOTEBOOK_PATH.read_text(encoding="utf-8"))
+    notebook_path = Path(sys.argv[1]) if len(sys.argv) > 1 else DEFAULT_NOTEBOOK_PATH
+    if not notebook_path.is_absolute():
+        notebook_path = PROJECT_ROOT / notebook_path
+
+    notebook = json.loads(notebook_path.read_text(encoding="utf-8"))
     namespace: dict[str, Any] = {
         "__name__": "__main__",
-        "__file__": str(NOTEBOOK_PATH),
+        "__file__": str(notebook_path),
     }
 
     execution_count = 0
@@ -98,8 +103,8 @@ def main() -> None:
             outputs.insert(0, {"output_type": "stream", "name": "stdout", "text": text})
         cell["outputs"] = outputs
 
-    NOTEBOOK_PATH.write_text(json.dumps(notebook, indent=1, ensure_ascii=False), encoding="utf-8")
-    print(f"Executed notebook and saved outputs: {NOTEBOOK_PATH}")
+    notebook_path.write_text(json.dumps(notebook, indent=1, ensure_ascii=False), encoding="utf-8")
+    print(f"Executed notebook and saved outputs: {notebook_path}")
 
 
 if __name__ == "__main__":
