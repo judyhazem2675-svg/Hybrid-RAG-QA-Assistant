@@ -1,0 +1,33 @@
+[
+  {
+    "query_id": "q1_micro_macro_average",
+    "query": "Why are micro average precision recall and F1 equal in multiclass classification?",
+    "relevant_doc_ids": ["datascience:15989"],
+    "notes": "Exact StackLite question about micro and macro averages in multiclass classification."
+  },
+  {
+    "query_id": "q2_ai_vs_ml",
+    "query": "What is the difference between artificial intelligence and machine learning?",
+    "relevant_doc_ids": ["ai:35", "datascience:19077"],
+    "notes": "Both AI and Data Science Stack Exchange contain directly relevant AI-vs-ML questions."
+  },
+  {
+    "query_id": "q3_deconvolution_layers",
+    "query": "What are deconvolutional layers in convolutional neural networks?",
+    "relevant_doc_ids": ["datascience:6107"],
+    "notes": "Directly relevant question about deconvolutional layers."
+  },
+  {
+    "query_id": "q4_keras_class_weights",
+    "query": "How do I set class weights for imbalanced classes in Keras?",
+    "relevant_doc_ids": ["datascience:13490"],
+    "notes": "Directly relevant Keras class-weight question."
+  },
+  {
+    "query_id": "q5_dying_relu",
+    "query": "What is the dying ReLU problem in neural networks?",
+    "relevant_doc_ids": ["datascience:5706", "datascience:18810"],
+    "notes": "Includes the direct dying-ReLU question and a related dead-ReLU diagnostic question."
+  }
+]
+

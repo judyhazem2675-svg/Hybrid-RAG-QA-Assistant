@@ -6,6 +6,7 @@ This repository now includes:
 
 - the CI/CD scaffold from the project infrastructure work
 - Jomana's assigned first milestone: **BM25 retrieval for keyword-based lexical search**
+- Abdallah's next milestone in progress: **retrieval evaluation with MAP@10 and MRR@10**
 
 ## Jomana BM25 Scope
 
@@ -80,3 +81,21 @@ The CI stages are:
 
 See `docs/ci_cd_setup.md` for setup notes and branch protection instructions.
 
+## Abdallah Retrieval Evaluation
+
+Abdallah's immediate milestone evaluates the BM25 baseline with manually judged relevance questions.
+
+Evaluation files:
+
+- `evaluation/bm25_eval_queries.json` - curated evaluation queries and relevant document IDs.
+- `src/evaluation.py` - MAP@10 and MRR@10 metric utilities.
+- `scripts/run_bm25_evaluation.py` - runs BM25 evaluation and writes outputs.
+- `results/bm25_evaluation_per_query.csv` - per-query AP@10 and RR@10 results.
+- `results/bm25_evaluation_top10.csv` - top-10 retrieved documents for evaluation queries.
+- `reports/bm25_evaluation_report.md` - short evaluation report.
+
+Run evaluation:
+
+```bash
+python scripts/run_bm25_evaluation.py
+```
