@@ -10,7 +10,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from src.bm25_retriever import BM25Retriever, load_stacklite_zip, write_results_csv
+from src.bm25_retriever import BM25Retriever, load_stacklite_zip, write_results_csv  # noqa: E402
 
 
 DATASET_PATH = PROJECT_ROOT / "DataSet.zip"
