@@ -6,7 +6,8 @@ This repository now includes:
 
 - the CI/CD scaffold from the project infrastructure work
 - Jomana's assigned first milestone: **BM25 retrieval for keyword-based lexical search**
-- Abdallah's next milestone in progress: **retrieval evaluation with MAP@10 and MRR@10**
+- Abdallah's milestone: **retrieval evaluation with MAP@10 and MRR@10**
+- Kadry Mostafa's milestone: **MiniLM semantic search with nDCG@10 comparison**
 
 ## Jomana BM25 Scope
 
@@ -105,4 +106,23 @@ Run evaluation:
 
 ```bash
 python scripts/run_bm25_evaluation.py
+```
+
+## Kadry Semantic Search
+
+Kadry's milestone adds dense retrieval with MiniLM embeddings and compares it against the BM25 baseline.
+
+Semantic search files:
+
+- `src/semantic_retriever.py` - MiniLM embedding wrapper and dense cosine-similarity retriever.
+- `scripts/run_semantic_evaluation.py` - compares BM25 and MiniLM on the evaluation questions.
+- `results/semantic_vs_bm25_comparison.csv` - per-query MAP, MRR, and nDCG comparison.
+- `results/semantic_evaluation_top10.csv` - top-10 MiniLM semantic retrieval results.
+- `reports/semantic_search_report.md` - short semantic search evaluation report.
+- `notebooks/Kadry_Semantic_Search.ipynb` - Colab/Jupyter notebook for the milestone.
+
+Run semantic evaluation:
+
+```bash
+python scripts/run_semantic_evaluation.py
 ```
