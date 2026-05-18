@@ -6,6 +6,7 @@ from src.evaluation import (
     EvaluationQuestion,
     average_precision_at_k,
     evaluate_retrieval,
+    ndcg_at_k,
     reciprocal_rank_at_k,
 )
 
@@ -26,6 +27,16 @@ class RetrievalMetricTests(unittest.TestCase):
 
         self.assertAlmostEqual(reciprocal_rank_at_k(retrieved, relevant, k=3), 1 / 3)
 
+    def test_ndcg_at_k_rewards_higher_ranked_relevant_documents(self) -> None:
+        high_ranked = ["d1", "d2", "d3"]
+        low_ranked = ["d3", "d2", "d1"]
+        relevant = {"d1"}
+
+        self.assertGreater(
+            ndcg_at_k(high_ranked, relevant, k=3),
+            ndcg_at_k(low_ranked, relevant, k=3),
+        )
+
     def test_evaluate_retrieval_returns_map_and_mrr(self) -> None:
         questions = [
             EvaluationQuestion("q1", "first query", frozenset({"d1"})),
@@ -41,6 +52,7 @@ class RetrievalMetricTests(unittest.TestCase):
         self.assertEqual(len(rows), 2)
         self.assertAlmostEqual(metrics["MAP@2"], (1.0 + 0.5) / 2)
         self.assertAlmostEqual(metrics["MRR@2"], (1.0 + 0.5) / 2)
+        self.assertIn("nDCG@2", metrics)
 
 
 if __name__ == "__main__":
