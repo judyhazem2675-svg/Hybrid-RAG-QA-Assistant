@@ -61,6 +61,12 @@ To rerun the notebook and save its outputs:
 python scripts/execute_notebook_inplace.py
 ```
 
+## Run the Full Project
+
+Use `notebooks/Run_All_Project.ipynb` as the master rerun notebook. It verifies the DVC dataset, runs CI-style checks, reruns BM25, BM25 evaluation, semantic search, RAG, citation-quality checks, and a Gradio UI callback smoke test.
+
+The notebook reuses the existing source files and scripts. It regenerates outputs, but it does not recreate the project from scratch or replace the individual teammate notebooks.
+
 ## BM25 Method Summary
 
 The retriever indexes each StackLite question as:
