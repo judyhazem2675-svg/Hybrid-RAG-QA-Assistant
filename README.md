@@ -152,3 +152,17 @@ Optional open-source LLM generation:
 ```bash
 python scripts/run_rag_demo.py --generator huggingface
 ```
+
+## Citation Quality Evaluation
+
+The citation-quality milestone reviews whether generated RAG answers are supported by their retrieved sources.
+
+Files:
+
+- `evaluation/citation_quality_questions.json` - five citation-quality evaluation questions.
+- `reports/citation_quality_examples.md` - good/bad citation examples and judgment notes.
+
+The review uses the outputs from Judy's RAG notebook and demo script:
+
+- `results/rag_sample_answers.csv`
+- `results/rag_retrieved_contexts.csv`
