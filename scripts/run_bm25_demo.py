@@ -10,10 +10,10 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from src.bm25_retriever import BM25Retriever, load_stacklite_zip, write_results_csv  # noqa: E402
+from src.bm25_retriever import BM25Retriever, load_stacklite_dataset, write_results_csv  # noqa: E402
 
 
-DATASET_PATH = PROJECT_ROOT / "DataSet.zip"
+DATASET_PATH = PROJECT_ROOT / "data" / "stacklite_questions.csv"
 OUTPUT_PATH = PROJECT_ROOT / "results/bm25_sample_top10.csv"
 
 SAMPLE_QUERIES = [
@@ -26,7 +26,7 @@ SAMPLE_QUERIES = [
 
 
 def main() -> None:
-    documents = load_stacklite_zip(DATASET_PATH)
+    documents = load_stacklite_dataset(DATASET_PATH)
     retriever = BM25Retriever(k1=1.5, b=0.75).fit(documents)
     query_to_results = {
         query: retriever.search(query, top_k=10) for query in SAMPLE_QUERIES

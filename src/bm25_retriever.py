@@ -268,6 +268,50 @@ def load_stacklite_zip(zip_path: str | Path) -> list[Document]:
     return documents
 
 
+def load_stacklite_csv(csv_path: str | Path) -> list[Document]:
+    """Load StackLite records from the DVC-tracked CSV dataset."""
+
+    csv_path = Path(csv_path)
+    if not csv_path.exists():
+        raise FileNotFoundError(f"Dataset CSV not found: {csv_path}")
+
+    documents: list[Document] = []
+    with csv_path.open(newline="", encoding="utf-8") as handle:
+        reader = csv.DictReader(handle)
+        for row in reader:
+            tags = json.loads(row.get("tags", "[]") or "[]")
+            question_id = int(row.get("question_id", 0) or 0)
+            source = str(row.get("source", "")).strip()
+            documents.append(
+                Document(
+                    doc_id=f"{source}:{question_id}",
+                    source=source,
+                    question_id=question_id,
+                    title=html.unescape(str(row.get("title", "")).strip()),
+                    body=clean_html(row.get("body", "")),
+                    tags=tuple(str(tag) for tag in tags),
+                    link=str(row.get("link", "")).strip(),
+                    score=int(row.get("score", 0) or 0),
+                    answer_count=int(row.get("answer_count", 0) or 0),
+                    view_count=int(row.get("view_count", 0) or 0),
+                )
+            )
+    if not documents:
+        raise ValueError(f"No StackLite records found in {csv_path}")
+    return documents
+
+
+def load_stacklite_dataset(dataset_path: str | Path) -> list[Document]:
+    """Load StackLite from the current CSV source or the original ZIP format."""
+
+    dataset_path = Path(dataset_path)
+    if dataset_path.suffix.lower() == ".csv":
+        return load_stacklite_csv(dataset_path)
+    if dataset_path.suffix.lower() == ".zip":
+        return load_stacklite_zip(dataset_path)
+    raise ValueError(f"Unsupported dataset format: {dataset_path}")
+
+
 class BM25Retriever:
     """Okapi BM25 retriever for keyword-based lexical search."""
 

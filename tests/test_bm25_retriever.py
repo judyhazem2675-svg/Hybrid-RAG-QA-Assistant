@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import csv
 import json
 import tempfile
 import unittest
@@ -10,6 +11,8 @@ from src.bm25_retriever import (
     BM25Retriever,
     Document,
     clean_html,
+    load_stacklite_csv,
+    load_stacklite_dataset,
     load_stacklite_zip,
     tokenize,
     write_results_csv,
@@ -78,6 +81,61 @@ class BM25RetrieverUnitTests(unittest.TestCase):
         self.assertEqual(len(documents), 1)
         self.assertEqual(documents[0].doc_id, "datascience:42")
         self.assertEqual(documents[0].body, "A lexical retrieval function.")
+
+    def test_load_stacklite_csv_reads_dvc_dataset_records(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            csv_path = Path(temp_dir) / "sample.csv"
+            with csv_path.open("w", newline="", encoding="utf-8") as handle:
+                writer = csv.DictWriter(
+                    handle,
+                    fieldnames=[
+                        "source",
+                        "question_id",
+                        "title",
+                        "body",
+                        "tags",
+                        "link",
+                        "score",
+                        "answer_count",
+                        "view_count",
+                    ],
+                )
+                writer.writeheader()
+                writer.writerow(
+                    {
+                        "source": "ai",
+                        "question_id": 35,
+                        "title": "AI vs ML",
+                        "body": "<p>Machine learning is a subset.</p>",
+                        "tags": json.dumps(["ai", "machine-learning"]),
+                        "link": "https://example.com/35",
+                        "score": 5,
+                        "answer_count": 2,
+                        "view_count": 99,
+                    }
+                )
+
+            documents = load_stacklite_csv(csv_path)
+
+        self.assertEqual(documents[0].doc_id, "ai:35")
+        self.assertEqual(documents[0].tags, ("ai", "machine-learning"))
+
+    def test_load_stacklite_dataset_routes_by_file_extension(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            csv_path = Path(temp_dir) / "sample.csv"
+            csv_path.write_text(
+                "\n".join(
+                    [
+                        "source,question_id,title,body,tags,link,score,answer_count,view_count",
+                        'ai,1,Title,Body,"[]",https://example.com,1,1,1',
+                    ]
+                ),
+                encoding="utf-8",
+            )
+
+            documents = load_stacklite_dataset(csv_path)
+
+        self.assertEqual(documents[0].doc_id, "ai:1")
 
     def test_write_results_csv_creates_flat_output(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

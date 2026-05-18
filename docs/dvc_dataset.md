@@ -1,18 +1,18 @@
 # DVC Dataset Tracking
 
-The StackLite corpus ZIP is tracked with DVC instead of Git.
+The StackLite corpus CSV is tracked with DVC instead of Git.
 
 Git tracks:
 
-- `DataSet.zip.dvc` - the small DVC pointer file
+- `data/stacklite_questions.csv.dvc` - the small DVC pointer file
 - `.dvc/config` - the DagsHub remote configuration
-- `.gitignore` - ignores the local `DataSet.zip`
+- `data/.gitignore` - ignores the local CSV materialized by DVC
 
 The actual dataset file is restored locally with:
 
 ```bash
 pip install dvc
-dvc pull DataSet.zip.dvc
+dvc pull data/stacklite_questions.csv.dvc
 ```
 
 The configured DVC remote is:
