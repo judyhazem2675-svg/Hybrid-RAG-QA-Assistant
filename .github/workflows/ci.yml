@@ -76,6 +76,13 @@ jobs:
           if [ -f requirements.txt ]; then python -m pip install -r requirements.txt; fi
           python -m pip install pytest pytest-cov
 
+      - name: Pull DVC dataset when configured
+        run: |
+          if [ -f DataSet.zip.dvc ] && [ ! -f DataSet.zip ]; then
+            python -m pip install dvc
+            python -m dvc pull DataSet.zip.dvc
+          fi
+
       - name: Run tests and enforce coverage when tests exist
         run: |
           python - <<'PY'
@@ -126,6 +133,13 @@ jobs:
           if [ -f requirements.txt ]; then python -m pip install -r requirements.txt; fi
           python -m pip install pytest
 
+      - name: Pull DVC dataset when configured
+        run: |
+          if [ -f DataSet.zip.dvc ] && [ ! -f DataSet.zip ]; then
+            python -m pip install dvc
+            python -m dvc pull DataSet.zip.dvc
+          fi
+
       - name: Run dataset validation when available
         run: |
           if [ -f tests/test_data_validation.py ]; then
@@ -152,6 +166,13 @@ jobs:
           python -m pip install -U pip
           if [ -f requirements.txt ]; then python -m pip install -r requirements.txt; fi
           python -m pip install pytest
+
+      - name: Pull DVC dataset when configured
+        run: |
+          if [ -f DataSet.zip.dvc ] && [ ! -f DataSet.zip ]; then
+            python -m pip install dvc
+            python -m dvc pull DataSet.zip.dvc
+          fi
 
       - name: Run model or retriever validation when available
         run: |

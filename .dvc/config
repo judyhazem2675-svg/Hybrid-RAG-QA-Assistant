@@ -1,0 +1,7 @@
+[core]
+    remote = dagshub
+    site_cache_dir = .dvc/site_cache
+[cache]
+    dir = cache
+['remote "dagshub"']
+    url = https://dagshub.com/kadry720/Hybrid-RAG-QA-Assistant.dvc

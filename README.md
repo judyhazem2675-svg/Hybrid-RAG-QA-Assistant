@@ -32,7 +32,7 @@ Out of scope for Jomana's BM25 milestone:
 - `scripts/execute_notebook_inplace.py` - helper script to run the notebook and save outputs inside it.
 - `notebooks/Jomana_BM25_Retrieval.ipynb` - Colab/Jupyter notebook for the milestone.
 - `results/bm25_sample_top10.csv` - generated top-10 sample retrieval results.
-- `DataSet.zip` - provided corpus archive.
+- `DataSet.zip.dvc` - DVC pointer for the provided corpus archive.
 
 ## Run BM25 Locally
 
@@ -44,6 +44,13 @@ The script loads `DataSet.zip`, builds the BM25 index, and writes:
 
 ```text
 results/bm25_sample_top10.csv
+```
+
+If `DataSet.zip` is not present after cloning, pull it from the configured DVC remote:
+
+```bash
+pip install dvc
+dvc pull DataSet.zip.dvc
 ```
 
 To rerun the notebook and save its outputs:
