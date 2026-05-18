@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import math
+import os
 from collections.abc import Sequence
 from typing import Any
 
@@ -16,6 +17,8 @@ class MiniLMEmbedder:
     """Lazy wrapper around SentenceTransformers so tests do not download a model."""
 
     def __init__(self, model_name: str = DEFAULT_MINILM_MODEL) -> None:
+        os.environ.setdefault("USE_TF", "0")
+        os.environ.setdefault("TRANSFORMERS_NO_TF", "1")
         try:
             from sentence_transformers import SentenceTransformer
         except ImportError as exc:

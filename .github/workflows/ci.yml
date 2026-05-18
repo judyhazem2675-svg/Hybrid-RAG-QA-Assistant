@@ -44,6 +44,8 @@ jobs:
               for file in root.rglob("*.py")
               if "__pycache__" not in file.parts
           ]
+          if Path("app.py").exists():
+              python_files.append(Path("app.py"))
 
           if not python_files:
               print("No Python files found yet. Lint stage passes for the CI scaffold.")
