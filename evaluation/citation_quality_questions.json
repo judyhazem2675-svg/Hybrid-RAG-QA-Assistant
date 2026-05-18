@@ -1,0 +1,32 @@
+[
+  {
+    "query_id": "cq1_micro_macro_average",
+    "query": "Why are micro average precision recall and F1 equal in multiclass classification?",
+    "expected_primary_citations": ["datascience:15989"],
+    "quality_focus": "Direct citation relevance and avoiding overclaims about macro averaging."
+  },
+  {
+    "query_id": "cq2_ai_vs_ml",
+    "query": "What is the difference between artificial intelligence and machine learning?",
+    "expected_primary_citations": ["ai:35", "datascience:19077"],
+    "quality_focus": "Clear distinction between AI and ML with citations from directly relevant posts."
+  },
+  {
+    "query_id": "cq3_deconvolution_layers",
+    "query": "What are deconvolutional layers in convolutional neural networks?",
+    "expected_primary_citations": ["datascience:6107"],
+    "quality_focus": "Primary citation should be the exact deconvolution-layer question; broad CNN citations are weaker support."
+  },
+  {
+    "query_id": "cq4_keras_class_weights",
+    "query": "How do I set class weights for imbalanced classes in Keras?",
+    "expected_primary_citations": ["datascience:13490"],
+    "quality_focus": "Answer should cite the Keras class-weight post before broader imbalanced-learning posts."
+  },
+  {
+    "query_id": "cq5_dying_relu",
+    "query": "What is the dying ReLU problem in neural networks?",
+    "expected_primary_citations": ["datascience:5706", "datascience:18810"],
+    "quality_focus": "Citations should support dead-ReLU behavior and should not overstate unrelated ReLU variants."
+  }
+]
