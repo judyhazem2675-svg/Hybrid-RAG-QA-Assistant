@@ -31,3 +31,14 @@ dvc push
 ```
 
 Do not commit `.dvc/config.local`; it contains local credentials.
+
+## GitHub Actions
+
+The CI workflow can pull the dataset during tests when this repository has a GitHub Actions secret named:
+
+```text
+DAGSHUB_TOKEN
+```
+
+Use a DagsHub token for the `kadry720` account, because the DVC remote is hosted under that account.
+If the secret is not configured, CI skips the DVC pull step and dataset-dependent integration tests skip.

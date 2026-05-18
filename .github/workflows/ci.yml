@@ -76,10 +76,19 @@ jobs:
           if [ -f requirements.txt ]; then python -m pip install -r requirements.txt; fi
           python -m pip install pytest pytest-cov
 
-      - name: Pull DVC dataset when configured
+      - name: Pull DVC dataset when credentials are configured
+        env:
+          DAGSHUB_TOKEN: ${{ secrets.DAGSHUB_TOKEN }}
         run: |
           if [ -f DataSet.zip.dvc ] && [ ! -f DataSet.zip ]; then
+            if [ -z "$DAGSHUB_TOKEN" ]; then
+              echo "DAGSHUB_TOKEN secret is not configured; dataset-dependent tests may skip."
+              exit 0
+            fi
             python -m pip install dvc
+            python -m dvc remote modify dagshub --local auth basic
+            python -m dvc remote modify dagshub --local user kadry720
+            python -m dvc remote modify dagshub --local password "$DAGSHUB_TOKEN"
             python -m dvc pull DataSet.zip.dvc
           fi
 
@@ -133,10 +142,19 @@ jobs:
           if [ -f requirements.txt ]; then python -m pip install -r requirements.txt; fi
           python -m pip install pytest
 
-      - name: Pull DVC dataset when configured
+      - name: Pull DVC dataset when credentials are configured
+        env:
+          DAGSHUB_TOKEN: ${{ secrets.DAGSHUB_TOKEN }}
         run: |
           if [ -f DataSet.zip.dvc ] && [ ! -f DataSet.zip ]; then
+            if [ -z "$DAGSHUB_TOKEN" ]; then
+              echo "DAGSHUB_TOKEN secret is not configured; dataset validation may skip."
+              exit 0
+            fi
             python -m pip install dvc
+            python -m dvc remote modify dagshub --local auth basic
+            python -m dvc remote modify dagshub --local user kadry720
+            python -m dvc remote modify dagshub --local password "$DAGSHUB_TOKEN"
             python -m dvc pull DataSet.zip.dvc
           fi
 
@@ -167,10 +185,19 @@ jobs:
           if [ -f requirements.txt ]; then python -m pip install -r requirements.txt; fi
           python -m pip install pytest
 
-      - name: Pull DVC dataset when configured
+      - name: Pull DVC dataset when credentials are configured
+        env:
+          DAGSHUB_TOKEN: ${{ secrets.DAGSHUB_TOKEN }}
         run: |
           if [ -f DataSet.zip.dvc ] && [ ! -f DataSet.zip ]; then
+            if [ -z "$DAGSHUB_TOKEN" ]; then
+              echo "DAGSHUB_TOKEN secret is not configured; model validation may skip."
+              exit 0
+            fi
             python -m pip install dvc
+            python -m dvc remote modify dagshub --local auth basic
+            python -m dvc remote modify dagshub --local user kadry720
+            python -m dvc remote modify dagshub --local password "$DAGSHUB_TOKEN"
             python -m dvc pull DataSet.zip.dvc
           fi
 

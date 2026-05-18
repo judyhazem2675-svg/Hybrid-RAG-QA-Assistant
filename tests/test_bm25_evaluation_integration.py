@@ -8,15 +8,21 @@ from src.evaluation import evaluate_retrieval, load_evaluation_questions
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
+DATASET_PATH = PROJECT_ROOT / "DataSet.zip"
 
 
 class BM25EvaluationIntegrationTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
+        if not DATASET_PATH.exists():
+            raise unittest.SkipTest(
+                "DataSet.zip is not available; run `dvc pull DataSet.zip.dvc` "
+                "to enable dataset integration tests."
+            )
         cls.questions = load_evaluation_questions(
             PROJECT_ROOT / "evaluation" / "bm25_eval_queries.json"
         )
-        cls.documents = load_stacklite_zip(PROJECT_ROOT / "DataSet.zip")
+        cls.documents = load_stacklite_zip(DATASET_PATH)
         cls.retriever = BM25Retriever().fit(cls.documents)
 
     def test_bm25_baseline_scores_high_on_curated_questions(self) -> None:
