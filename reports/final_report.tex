@@ -1,0 +1,159 @@
+\documentclass[11pt]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{xurl}
+
+\setlist{nosep}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    urlcolor=blue
+}
+
+\title{Hybrid RAG QA Assistant Final Report}
+\author{Jomana, Abdallah, Kadry Mostafa, and Judy Hazem}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{Project Overview}
+
+The goal of this project is to build a retrieval-based question answering assistant for technical AI and machine learning questions. The system uses the StackLite question corpus as its knowledge source and combines lexical retrieval, dense semantic retrieval, retrieval evaluation, and retrieval-augmented generation (RAG). The final repository includes reusable Python modules, milestone notebooks, saved result CSVs, a Gradio live interface, and this final report.
+
+The implementation is organized around four retrieval and generation layers. First, the BM25 layer provides a strong lexical baseline for exact technical terms such as ``class weights'', ``dying ReLU'', and ``deconvolutional layers''. Second, the evaluation layer measures whether manually judged relevant documents appear in the first ten results. Third, the semantic layer uses MiniLM sentence embeddings to retrieve conceptually similar questions and compares those results against BM25 with nDCG@10. Fourth, the RAG layer fuses retrieved evidence and produces citation-grounded answers that expose the source documents used for each answer.
+
+The main source files are \path{src/bm25_retriever.py}, \path{src/evaluation.py}, \path{src/semantic_retriever.py}, and \path{src/rag_pipeline.py}. The user interface is provided by \path{app.py}. Dataset storage is handled through DVC, with the CSV pointer stored at \path{data/stacklite_questions.csv.dvc}. Users who clone the repository should run \path{dvc pull data/stacklite_questions.csv.dvc} before running the live app or full dataset evaluations.
+
+\section{BM25 Method and Results}
+
+The BM25 retriever is the lexical search baseline. Each StackLite record is loaded as a document with citation-ready metadata: source site, question ID, title, cleaned body text, tags, Stack Exchange link, score, answer count, and view count. HTML question bodies are converted to plain text with Python's standard library HTML parser. The searchable document text is built from a lightly boosted title, the cleaned body, and the tags. The title is included twice so direct title matches are rewarded without creating a separate fielded retrieval model.
+
+Tokenization preserves useful technical tokens such as C++, C\#, and .NET while removing common English stopwords. The BM25 index uses Okapi BM25 with $k_1 = 1.5$ and $b = 0.75$. Its inverse document frequency uses the smoothed form
+
+\[
+\log \left(1 + \frac{N - df + 0.5}{df + 0.5}\right),
+\]
+
+where $N$ is the number of documents and $df$ is the number of documents containing the term. At query time, scores are computed from the query term frequencies and document postings. Ties are broken by Stack Exchange score and answer count, which helps promote better community-vetted posts when lexical evidence is otherwise similar.
+
+The BM25 demo exports top ten results to \path{results/bm25_sample_top10.csv}. The sample queries cover common technical questions in classification metrics, AI versus machine learning, deconvolutional layers, Keras class weights, and the dying ReLU problem. The saved results show that BM25 retrieves the directly relevant question at rank one for four of the five sample questions and within the first two ranks for the AI versus machine learning query, where two relevant posts exist across the AI and Data Science Stack Exchange sources.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{p{0.43\linewidth}llr}
+\toprule
+Sample query & Rank 1 document & Source & BM25 score \\
+\midrule
+Micro average precision, recall, and F1 & \path{datascience:15989} & Data Science & 48.493982 \\
+AI versus machine learning & \path{datascience:19077} & Data Science & 22.033671 \\
+Deconvolutional layers & \path{datascience:6107} & Data Science & 22.192062 \\
+Keras class weights & \path{datascience:13490} & Data Science & 32.996294 \\
+Dying ReLU & \path{datascience:5706} & Data Science & 24.127748 \\
+\bottomrule
+\end{tabular}
+\caption{Representative rank-one BM25 results from \path{results/bm25_sample_top10.csv}.}
+\end{table}
+
+These results confirm that BM25 is a useful first baseline for this corpus. Many project queries are phrased similarly to Stack Exchange question titles, so exact lexical overlap is highly informative. The limitation is that BM25 can miss semantically similar questions when the wording changes, especially when the query uses synonyms or broader conceptual phrasing.
+
+\section{BM25 Evaluation with MAP@10 and MRR@10}
+
+Retrieval evaluation uses the manually curated questions in \path{evaluation/bm25_eval_queries.json}. Each evaluation question includes a query, one or more relevant document IDs, and a short note explaining why the documents are relevant. The evaluation script runs BM25 for each query, records the top ten document IDs, and computes Average Precision at 10 (AP@10) and Reciprocal Rank at 10 (RR@10). The aggregate metrics are Mean Average Precision at 10 (MAP@10) and Mean Reciprocal Rank at 10 (MRR@10).
+
+MAP@10 rewards retrieval runs that place all known relevant documents high in the first page of results. MRR@10 focuses on how early the first relevant document appears. For this project, both metrics are important: MAP@10 checks the quality of the ranked evidence list, while MRR@10 checks whether the first citation shown to the RAG system is likely to be useful.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lrrr}
+\toprule
+Metric & Queries & Score & Output file \\
+\midrule
+MAP@10 & 5 & 1.000000 & \path{results/bm25_evaluation_per_query.csv} \\
+MRR@10 & 5 & 1.000000 & \path{results/bm25_evaluation_per_query.csv} \\
+\bottomrule
+\end{tabular}
+\caption{BM25 evaluation summary.}
+\end{table}
+
+The BM25 evaluation reaches MAP@10 = 1.000000 and MRR@10 = 1.000000 on the five curated queries. Every query has at least one relevant document in the first rank or first two ranks, and all judged relevant documents appear within the first ten results. This is a strong result for the milestone, but it should be interpreted carefully. The evaluation set is small and intentionally focused on queries with known StackLite matches. A larger final benchmark would need more diverse wording, more negative cases, and graded relevance labels.
+
+\section{Semantic Search and nDCG@10}
+
+The semantic retriever adds dense retrieval with \path{sentence-transformers/all-MiniLM-L6-v2}. Each document is converted into natural text using its title, body, and tags. The model encodes these document texts into normalized embeddings, and query embeddings are compared against document embeddings with cosine similarity, implemented as a dot product over normalized vectors.
+
+Semantic retrieval is evaluated with the same five curated questions used for BM25. In addition to MAP@10 and MRR@10, the semantic comparison includes binary nDCG@10. nDCG@10 rewards relevant documents that appear higher in the ranking while normalizing by the best possible ranking for each query. This is especially useful for comparing BM25 and dense retrieval when both systems retrieve relevant documents but order them differently.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lrrr}
+\toprule
+Retriever & MAP@10 & MRR@10 & nDCG@10 \\
+\midrule
+BM25 & 1.000000 & 1.000000 & 1.000000 \\
+MiniLM semantic & 1.000000 & 1.000000 & 1.000000 \\
+\bottomrule
+\end{tabular}
+\caption{BM25 versus MiniLM semantic retrieval from \path{results/semantic_vs_bm25_comparison.csv}.}
+\end{table}
+
+Both BM25 and MiniLM semantic retrieval score 1.000000 on MAP@10, MRR@10, and nDCG@10 for the current evaluation set. The per-query comparison shows that MiniLM often retrieves the same directly relevant documents but can reorder related posts. For example, on the AI versus machine learning query, MiniLM ranks the AI Stack Exchange post first while BM25 ranks the Data Science Stack Exchange post first. Both posts are judged relevant, so both rankings receive full credit.
+
+The semantic layer is still valuable even when the current metrics match BM25. BM25 is strongest when user wording overlaps with titles and tags. MiniLM provides a complementary path when the query is paraphrased or concept-based. In the RAG system, this complementarity is used through reciprocal rank fusion so that documents found by both methods are promoted, while unique semantic hits can still enter the context set.
+
+\section{RAG Integration}
+
+The RAG pipeline combines retrieval and answer generation. It can run with BM25 only or with a hybrid retriever that fuses BM25 and MiniLM results. In hybrid mode, both retrievers return candidate lists, and reciprocal rank fusion (RRF) combines them. The default RRF constant is 60. Documents receive more weight when they rank highly in either retriever and receive additional support when they appear in both result sets.
+
+The answer generation layer has two modes. The default mode is a deterministic citation generator designed for reliable demos and tests. It selects the top retrieved contexts and writes an answer that explicitly lists each source passage with numbered citation markers such as [1], [2], and [3]. This mode avoids unsupported claims by telling the user to rely on the retrieved evidence. The optional mode uses the open-source HuggingFace text-to-text model \path{google/flan-t5-small}. The optional generator is useful for more natural wording, but it requires a model download and can introduce more generation variability.
+
+The RAG demo writes answers to \path{results/rag_sample_answers.csv} and the exact retrieved evidence to \path{results/rag_retrieved_contexts.csv}. For the five sample questions, the hybrid system generally selects documents found by both BM25 and MiniLM. The RRF output records component ranks and component scores so the source of each context is transparent. For example, the dying ReLU question retrieves \path{datascience:5706} and \path{datascience:18810} from both retrievers, then adds a related ReLU versus Leaky ReLU document from the semantic retriever.
+
+\section{Citation Quality Observations}
+
+The citation design is intentionally transparent. Every generated answer includes numbered citation markers, document IDs, titles, snippets, and Stack Exchange links. The evidence table in the UI also shows which retriever or retrievers found each context. This makes it possible to inspect whether the answer is grounded in the displayed sources.
+
+Citation quality is strongest when the top retrieved document is a direct match to the query. This happens for questions such as Keras class weights, dying ReLU, deconvolutional layers, and micro versus macro averaging. In those cases, the first citation title closely matches the query, and the snippet provides enough context to justify using the post as grounding evidence. The AI versus machine learning query also performs well because both judged relevant documents appear in the first two ranks.
+
+The main limitation is that StackLite stores question posts rather than full accepted answers. A citation can prove that a retrieved post is topically relevant, but it may not always contain the final explanatory answer that a user expects. Some lower-ranked RAG contexts are related rather than exact. For example, a deconvolution query can include general CNN architecture posts, and a dying ReLU query can include a ReLU versus Leaky ReLU post. These are useful supporting contexts, but they should not be treated as complete evidence for every detail of a generated answer.
+
+For this reason, the default generator is conservative. It summarizes retrieved evidence and avoids making claims beyond the snippets. A future improvement would ingest answer bodies as well as question bodies, add graded citation judgments, and flag citations as direct, related, or weak.
+
+\section{Interactive Gradio UI}
+
+The repository now includes a Gradio app at \path{app.py}. It provides live question answering with a text input, retriever selection, generator selection, candidate count slider, and cited context count slider. The default retriever is hybrid BM25 plus MiniLM, and users can switch to BM25-only mode when they want a faster lexical baseline. The default generator is the deterministic extractive citation mode, while the optional HuggingFace FLAN-T5 mode is available for users who want open-source model generation.
+
+The app returns four visible outputs: the generated answer, a retrieved evidence table, citation links, and a short status message. The evidence table includes rank, retriever source, document ID, title, RRF score, link, and snippet. This design makes the UI suitable for live walkthroughs because viewers can see both the answer and the evidence behind it on the same screen.
+
+To run the app locally, install dependencies and pull the DVC dataset:
+
+\begin{verbatim}
+pip install -r requirements.txt
+pip install dvc
+dvc pull data/stacklite_questions.csv.dvc
+python app.py
+\end{verbatim}
+
+If the CSV is missing, the app returns a clear setup message instead of crashing. This behavior is important because the repository stores the dataset through DVC rather than committing the full CSV to Git.
+
+\section{Team Contribution Log}
+
+\begin{itemize}
+    \item Jomana: BM25 retrieval implementation and BM25 demo outputs.
+    \item Abdallah: retrieval evaluation with MAP@10 and MRR@10.
+    \item Kadry Mostafa: semantic search with MiniLM and nDCG@10 comparison.
+    \item Judy Hazem: RAG integration and cited answer generation.
+    \item Judy Hazem and Abdallah: citation quality review and observations.
+    \item Kadry Mostafa: Gradio interactive UI.
+\end{itemize}
+
+\section{Conclusion}
+
+The final system satisfies the core project requirements: BM25 lexical retrieval, retrieval evaluation, MiniLM semantic search, hybrid RAG, citation-grounded answers, and a live Gradio interface. The saved metrics show perfect performance on the current five-query evaluation set, and the RAG outputs provide inspectable citations for each answer. The strongest next step is to expand the evaluation benchmark and include answer bodies in the corpus so citations can support both relevance and full factual explanation.
+
+\end{document}

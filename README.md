@@ -152,3 +152,42 @@ Optional open-source LLM generation:
 ```bash
 python scripts/run_rag_demo.py --generator huggingface
 ```
+
+## Interactive Gradio UI
+
+The live Q&A app is implemented in `app.py`.
+
+Run it locally:
+
+```bash
+pip install -r requirements.txt
+pip install dvc
+dvc pull data/stacklite_questions.csv.dvc
+python app.py
+```
+
+The UI supports:
+
+- hybrid BM25 + MiniLM retrieval
+- BM25-only retrieval for faster lexical demos
+- deterministic extractive citation answers
+- optional HuggingFace FLAN-T5 generation
+- retrieved evidence tables with document IDs, links, snippets, retriever sources, and RRF scores
+
+If `data/stacklite_questions.csv` is missing, the app shows the DVC setup command instead of failing silently.
+
+## Final Report and Demo
+
+- Final Overleaf-ready report: `reports/final_report.tex`
+- Video walkthrough script: `docs/video_demo_walkthrough.md`
+
+The walkthrough is structured for a 3-5 minute demo covering retrieval, evaluation, RAG citations, and the Gradio interface.
+
+## Team Log
+
+- Jomana: BM25
+- Abdallah: retrieval evaluation
+- Kadry: semantic search
+- Judy: RAG
+- Judy + Abdallah: citation quality
+- Kadry: UI
