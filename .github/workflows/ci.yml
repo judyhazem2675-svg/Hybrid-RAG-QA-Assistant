@@ -76,6 +76,22 @@ jobs:
           if [ -f requirements.txt ]; then python -m pip install -r requirements.txt; fi
           python -m pip install pytest pytest-cov
 
+      - name: Pull DVC dataset when credentials are configured
+        env:
+          DAGSHUB_TOKEN: ${{ secrets.DAGSHUB_TOKEN }}
+        run: |
+          if [ -f data/stacklite_questions.csv.dvc ] && [ ! -f data/stacklite_questions.csv ]; then
+            if [ -z "$DAGSHUB_TOKEN" ]; then
+              echo "DAGSHUB_TOKEN secret is not configured; dataset-dependent tests may skip."
+              exit 0
+            fi
+            python -m pip install dvc
+            python -m dvc remote modify dagshub --local auth basic
+            python -m dvc remote modify dagshub --local user kadry720
+            python -m dvc remote modify dagshub --local password "$DAGSHUB_TOKEN"
+            python -m dvc pull data/stacklite_questions.csv.dvc
+          fi
+
       - name: Run tests and enforce coverage when tests exist
         run: |
           python - <<'PY'
@@ -126,6 +142,22 @@ jobs:
           if [ -f requirements.txt ]; then python -m pip install -r requirements.txt; fi
           python -m pip install pytest
 
+      - name: Pull DVC dataset when credentials are configured
+        env:
+          DAGSHUB_TOKEN: ${{ secrets.DAGSHUB_TOKEN }}
+        run: |
+          if [ -f data/stacklite_questions.csv.dvc ] && [ ! -f data/stacklite_questions.csv ]; then
+            if [ -z "$DAGSHUB_TOKEN" ]; then
+              echo "DAGSHUB_TOKEN secret is not configured; dataset validation may skip."
+              exit 0
+            fi
+            python -m pip install dvc
+            python -m dvc remote modify dagshub --local auth basic
+            python -m dvc remote modify dagshub --local user kadry720
+            python -m dvc remote modify dagshub --local password "$DAGSHUB_TOKEN"
+            python -m dvc pull data/stacklite_questions.csv.dvc
+          fi
+
       - name: Run dataset validation when available
         run: |
           if [ -f tests/test_data_validation.py ]; then
@@ -152,6 +184,22 @@ jobs:
           python -m pip install -U pip
           if [ -f requirements.txt ]; then python -m pip install -r requirements.txt; fi
           python -m pip install pytest
+
+      - name: Pull DVC dataset when credentials are configured
+        env:
+          DAGSHUB_TOKEN: ${{ secrets.DAGSHUB_TOKEN }}
+        run: |
+          if [ -f data/stacklite_questions.csv.dvc ] && [ ! -f data/stacklite_questions.csv ]; then
+            if [ -z "$DAGSHUB_TOKEN" ]; then
+              echo "DAGSHUB_TOKEN secret is not configured; model validation may skip."
+              exit 0
+            fi
+            python -m pip install dvc
+            python -m dvc remote modify dagshub --local auth basic
+            python -m dvc remote modify dagshub --local user kadry720
+            python -m dvc remote modify dagshub --local password "$DAGSHUB_TOKEN"
+            python -m dvc pull data/stacklite_questions.csv.dvc
+          fi
 
       - name: Run model or retriever validation when available
         run: |
