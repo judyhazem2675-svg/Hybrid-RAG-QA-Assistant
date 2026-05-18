@@ -8,6 +8,7 @@ This repository now includes:
 - Jomana's assigned first milestone: **BM25 retrieval for keyword-based lexical search**
 - Abdallah's milestone: **retrieval evaluation with MAP@10 and MRR@10**
 - Kadry Mostafa's milestone: **MiniLM semantic search with nDCG@10 comparison**
+- Judy Hazem's milestone: **RAG integration with citation-grounded answers**
 
 ## Jomana BM25 Scope
 
@@ -125,4 +126,29 @@ Run semantic evaluation:
 
 ```bash
 python scripts/run_semantic_evaluation.py
+```
+
+## Judy RAG Integration
+
+Judy's milestone connects retrieval to answer generation with citation-ready outputs.
+
+RAG files:
+
+- `src/rag_pipeline.py` - RRF fusion, cited answer generation, and optional HuggingFace text2text generation.
+- `scripts/run_rag_demo.py` - runs the RAG demo and writes answer/context outputs.
+- `results/rag_sample_answers.csv` - generated answers with citation markers and links.
+- `results/rag_retrieved_contexts.csv` - retrieved evidence used for each generated answer.
+- `reports/rag_integration_report.md` - short RAG integration report.
+- `notebooks/Judy_RAG_Integration.ipynb` - Colab/Jupyter notebook for the milestone.
+
+Run the default hybrid RAG demo:
+
+```bash
+python scripts/run_rag_demo.py
+```
+
+Optional open-source LLM generation:
+
+```bash
+python scripts/run_rag_demo.py --generator huggingface
 ```
