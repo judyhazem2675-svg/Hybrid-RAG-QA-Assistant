@@ -5,7 +5,7 @@ This report covers Kadry Mostafa's semantic retrieval milestone.
 ## Method
 
 - Dense model: `sentence-transformers/all-MiniLM-L6-v2`
-- Corpus: StackLite questions from `DataSet.zip`
+- Corpus: StackLite questions from `data/stacklite_questions.csv`
 - Baseline: Jomana's Okapi BM25 retriever
 - Relevance judgments: Abdallah's curated evaluation queries
 

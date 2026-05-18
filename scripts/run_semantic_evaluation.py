@@ -10,12 +10,12 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from src.bm25_retriever import BM25Retriever, load_stacklite_zip, write_results_csv  # noqa: E402
+from src.bm25_retriever import BM25Retriever, load_stacklite_dataset, write_results_csv  # noqa: E402
 from src.evaluation import evaluate_retrieval, load_evaluation_questions, write_dict_csv  # noqa: E402
 from src.semantic_retriever import DEFAULT_MINILM_MODEL, SemanticRetriever  # noqa: E402
 
 
-DATASET_PATH = PROJECT_ROOT / "DataSet.zip"
+DATASET_PATH = PROJECT_ROOT / "data" / "stacklite_questions.csv"
 QUESTIONS_PATH = PROJECT_ROOT / "evaluation" / "bm25_eval_queries.json"
 COMPARISON_OUTPUT = PROJECT_ROOT / "results" / "semantic_vs_bm25_comparison.csv"
 SEMANTIC_RUN_OUTPUT = PROJECT_ROOT / "results" / "semantic_evaluation_top10.csv"
@@ -24,7 +24,7 @@ REPORT_OUTPUT = PROJECT_ROOT / "reports" / "semantic_search_report.md"
 
 def main() -> None:
     questions = load_evaluation_questions(QUESTIONS_PATH)
-    documents = load_stacklite_zip(DATASET_PATH)
+    documents = load_stacklite_dataset(DATASET_PATH)
 
     bm25_retriever = BM25Retriever(k1=1.5, b=0.75).fit(documents)
     semantic_retriever = SemanticRetriever(model_name=DEFAULT_MINILM_MODEL).fit(documents)
@@ -113,7 +113,7 @@ def write_report(
         "## Method",
         "",
         f"- Dense model: `{DEFAULT_MINILM_MODEL}`",
-        "- Corpus: StackLite questions from `DataSet.zip`",
+        "- Corpus: StackLite questions from `data/stacklite_questions.csv`",
         "- Baseline: Jomana's Okapi BM25 retriever",
         "- Relevance judgments: Abdallah's curated evaluation queries",
         "",
